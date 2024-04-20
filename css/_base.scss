@@ -1,0 +1,15 @@
+
+body { 
+    margin: 0;
+    font-family: "Jersey 25", sans-serif;
+    font-style: normal;
+}
+.fixed_menu {
+    position: absolute;
+    top: 10px;
+    width: 100%;
+    text-align: center;
+    z-index: 100;
+    display:block;
+    color: white;
+}

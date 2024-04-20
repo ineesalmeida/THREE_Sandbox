@@ -1,0 +1,32 @@
+body {
+  margin: 0;
+  font-family: "Jersey 25", sans-serif;
+  font-style: normal;
+}
+
+.fixed_menu {
+  position: absolute;
+  top: 10px;
+  width: 100%;
+  text-align: center;
+  z-index: 100;
+  display: block;
+  color: white;
+}
+
+.nav_bar a {
+  text-decoration: none;
+  color: inherit;
+}
+.nav_bar ul {
+  list-style: none;
+  display: flex;
+}
+.nav_bar ul li {
+  font-size: 1.5em;
+  padding: 0.5em 1em;
+}
+.nav_bar ul li:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: 0.2s;
+}/*# sourceMappingURL=index.css.map */

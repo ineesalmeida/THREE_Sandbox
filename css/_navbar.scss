@@ -1,0 +1,22 @@
+
+.nav_bar {
+    a {
+        text-decoration: none;
+        color: inherit;
+    }
+
+    ul {
+        list-style: none;
+        display: flex;
+
+        li {
+            font-size: 1.5em;
+            padding: 0.5em 1em;
+
+            &:hover {
+                background-color: rgba($color: #fff, $alpha: 0.1);
+                transition: 0.2s;
+            }
+        }
+    }
+}
