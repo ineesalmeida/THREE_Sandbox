@@ -50,9 +50,9 @@ document.body.appendChild( renderer.domElement );
 
 // Add text
 const text_material = new THREE.MeshLambertMaterial( { color: 0xffffff } );
-addText("Home", text_material, scene, 0.5, [-1, 0, -2]);
-addText("About", text_material, scene, 0.5, [-1, 0, -2 + 100]);
-addText("Contact", text_material, scene, 0.5, [-1, 0, -2 + 200]);
+addText("Home", text_material, scene, 0.5, [0, 0, -2]);
+addText("About", text_material, scene, 0.5, [0, 0, -2 + 100]);
+addText("Contact", text_material, scene, 0.5, [0, 0, -2 + 200]);
 
 // Add CanGuru model
 // const fbxLoader = new FBXLoader()
@@ -108,6 +108,7 @@ function addText(_text, _material, _scene, _size=1, _position=[0, 0, 0]) {
         } );
         let _obj = new THREE.Mesh( _geometry, _material);
         _obj.position.set(..._position);
+        _geometry.center();
         _scene.add( _obj );
     } );
 }
@@ -124,7 +125,7 @@ onmousemove = (event) => {
 let zoom_speed = 0.1;
 let checkpoint_distance = 100;
 let current_checkpoint = 0;
-let checkpoint_offset = 4;
+let checkpoint_offset = 2;
 let transition_speed = 5;
 let transitioning = false;
 addEventListener("wheel", (event) => {});
