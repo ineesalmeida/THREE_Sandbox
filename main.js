@@ -6,8 +6,9 @@ import { TextGeometry } from 'three/addons/geometries/TextGeometry.js';
 import { FontLoader } from 'three/addons/loaders/FontLoader.js';
 
 // Create scene and camera
+let i_fiv = 75;
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+const camera = new THREE.PerspectiveCamera( i_fiv, window.innerWidth / window.innerHeight, 0.1, 1000 );
 
 // Checkpoints: Vector3 Position + Quartenion Rotation
 let current_checkpoint = 0;
@@ -152,21 +153,26 @@ function addText(_text, _material, _scene, _size=1, _position=[0, 0, 0], _rotati
 // };
 
 
-let zoom_speed = 0.1;
-let checkpoint_offset = 1;
+let i_zoom_speed = 0.05;
+let i_checkpoint_offset = 0.5;
+let zoom_speed = i_zoom_speed / Math.pow(10, current_checkpoint)
+let checkpoint_offset = i_checkpoint_offset / Math.pow(10, current_checkpoint)
+
 let transitioning = false;
 addEventListener("wheel", (event) => {});
 onwheel = (event) => {
     if (transitioning) return;
-
-    if (current_checkpoint == 0 && event.deltaY > 0) return;
-    if (current_checkpoint == CHECKPOINTS.length - 1 && event.deltaY < 0) return;
-    
     let _current_checkpoint_z = CHECKPOINTS[current_checkpoint][0].z;
-    if (camera.position.z > _current_checkpoint_z + checkpoint_offset) {
+
+    // if (current_checkpoint == 0 && event.deltaY > 0) return;
+    // if (current_checkpoint == CHECKPOINTS.length - 1 && event.deltaY < 0) return;
+
+    if (event.deltaY > 0 && camera.position.z > _current_checkpoint_z + checkpoint_offset) {
+        if (current_checkpoint == 0) return;
         previousCheckpoint();
     }
-    else if (camera.position.z < _current_checkpoint_z - checkpoint_offset) {
+    else if (event.deltaY < 0 && camera.position.z < _current_checkpoint_z - checkpoint_offset) {
+        if (current_checkpoint == CHECKPOINTS.length - 1) return;
         nextCheckpoint();
     }
     else {
@@ -174,23 +180,31 @@ onwheel = (event) => {
     }
 };
 
-let transition_frames = 1000;
+let transition_frames = 60;
+let stop_transition = false;
+
 function moveCamera(_checkpoint) {
     console.log("Moving camera...")
+    zoom_speed = i_zoom_speed / Math.pow(10, current_checkpoint)
+    checkpoint_offset = i_checkpoint_offset / Math.pow(10, current_checkpoint)
+
     transitioning = true;
 
-    let [target_position, target_rotation] = _checkpoint;
+    let [target_position, target_rotation] = CHECKPOINTS[_checkpoint];
     let _alpha = 0;
-    let _alphaDelta = camera.position.distanceTo( target_position ) / transition_frames;
+    let _alphaDelta = 1 / transition_frames;
 
     // Needed because `slerp` wasn't functioning...
     let _target_rotation_vector4 = new THREE.Vector4(...target_rotation);
     let _current_camera_vector4 = new THREE.Vector4(...camera.quaternion);
 
     let tick = function() {
-        camera.position.lerp(target_position, _alpha);    
+        if (stop_transition) return;
+
+        let _eased_alpha = EaseIn(_alpha, transition_frames);
+        camera.position.lerp(target_position, _eased_alpha);    
         // camera.quaternion.slerp(target_rotation, 1)
-        _current_camera_vector4.lerp(_target_rotation_vector4, _alpha)
+        _current_camera_vector4.lerp(_target_rotation_vector4, _eased_alpha)
         camera.quaternion.set(..._current_camera_vector4);
         if (_alpha < 1) {
             (window.requestAnimationFrame && requestAnimationFrame(tick)) || setTimeout(tick, 16);
@@ -200,8 +214,10 @@ function moveCamera(_checkpoint) {
             camera.position.set(...target_position);
             camera.quaternion.set(...target_rotation);
             transitioning = false;
+            console.log("Finished transition")
         }
     };
+
     tick();
 }
 
@@ -209,20 +225,29 @@ function nextCheckpoint() {
     console.log("Next checkpoint!")
     if (current_checkpoint + 1 == CHECKPOINTS.length) return
     current_checkpoint += 1;
-    CHECKPOINTS[current_checkpoint]
-    moveCamera(CHECKPOINTS[current_checkpoint]);
+    moveCamera(current_checkpoint);
 }
 
 function previousCheckpoint() {
     console.log("Previous checkpoint!")
     if (current_checkpoint == 0) return
     current_checkpoint -= 1;
-    CHECKPOINTS[current_checkpoint]
-    moveCamera(CHECKPOINTS[current_checkpoint]);
+    moveCamera(current_checkpoint);
 }
 
 for (let i = 0; i < 3; i++) {
     document.getElementById("checkpoint_" + i.toString()).onclick = function() {
-        moveCamera(CHECKPOINTS[i]);
+        if (i == current_checkpoint) return;
+        if (transitioning) return;
+
+        current_checkpoint = i;
+        moveCamera(i);
     }
 };
+
+
+// LERP TWEEN METHODS
+function EaseIn(t)
+{
+    return t * t * t;
+}
